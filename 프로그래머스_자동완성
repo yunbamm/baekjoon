@@ -1,0 +1,93 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<algorithm>
+
+using namespace std;
+
+//소문자
+//a(97) z(122)
+
+//문자열 , 비교대상인지
+vector<pair<string, bool>> v[26];
+
+//index , 현재비교될 문자열 , 완성 문자열
+bool find(int index, string now, string s) {
+    int count = 0;
+
+    for (int i = 0; i < v[index].size(); i++) {
+        //비교되는 문자열
+        string tmp = v[index][i].first;
+
+        if (count > 1) break;
+        //비교대상이 아니면
+        if (v[index][i].second == false) continue;
+
+        //만약 tmp가 now보다 size가 작다면
+        if (tmp.size() < now.size()) {
+            v[index][i].second = false;
+            continue;
+        }
+
+        //만약 tmp가 s라면 
+        if (tmp == now && now == s) return true;
+
+        //tmp와 비교
+        for (int j = 0; j < now.size(); j++) {
+            if (now[j] != tmp[j]) {
+                v[index][i].second = false;
+                break;
+            }
+            else if (j == now.size() - 1) {
+                count++;
+            }
+        }
+    }
+
+    //같은게 2개이상면 false
+    if (count > 1) return false;
+    else return true;
+}
+
+int solution(vector<string> words) {
+
+    string now;
+    int index;
+
+    //word마다 v에 저장
+    for (int i = 0; i < words.size(); i++) {
+        now = words[i];
+        index = now[0] - 'a';
+        v[index].push_back({ now , true });
+    }
+
+    //sort
+    for (int i = 0; i < 26; i++) {
+        sort(v[i].begin(), v[i].end());
+    }
+
+    int answer = 0;
+
+    //word의 한자씩 보면서 v에 겹치는게 있는지 본다
+    for (int i = 0; i < words.size(); i++) {
+        now = words[i];
+        index = now[0] - 'a';
+
+        //check를 초기화 
+        for (int j = 0; j < v[index].size(); j++) {
+            v[index][j].second = true;
+        }
+        string s = now;
+        string tmp;
+
+        for (int j = 0; j < now.size(); j++) {
+            tmp += now[j];
+            if (find(index, tmp, s)) {
+                answer += tmp.size();
+                break;
+            }
+        }
+
+    }
+    return answer;
+}
