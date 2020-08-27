@@ -1,0 +1,146 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include<iostream>
+using namespace std;
+
+//시작 x, y , 가로(1) 세로(2)
+int arr[101][101][3];
+int map[101][101];          //빈칸(0) 벽(1)
+int N;
+//단순 이동
+pair<int, int> p[4] = { {1,0},{0,1},{-1,0},{0,-1} };
+
+void BFS() {
+    //좌표 , 가로 세로 상태
+    queue<pair<pair<int, int>, int>>q;
+    q.push({ {1,1},1 });
+
+    //arr초기화
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
+            for (int k = 1; k < 3; k++) {
+                arr[i][j][k] = -1;
+            }
+        }
+    }
+    arr[1][1][1] = 0;
+
+    while (!q.empty()) {
+        int x = q.front().first.first;
+        int y = q.front().first.second;
+        int s = q.front().second;
+
+
+        q.pop();
+
+        //우선 그냥 단순이동
+        for (int i = 0; i < 4; i++) {
+            int newx = x + p[i].first;
+            int newy = y + p[i].second;
+
+
+            //좌표를 벗어나면 무시
+            //가로일때 (x,y) (x, y+1)
+            if (s == 1) {
+                if (newx <= 0 || newx > N || newy <= 0 || newy + 1 > N) continue;
+
+                if (map[newx][newy] == 0 && map[newx][newy + 1] == 0) {
+                    if (arr[newx][newy][s] == -1) {
+                        arr[newx][newy][s] = arr[x][y][s] + 1;
+                        q.push({ {newx,newy},s });
+                    }
+                }
+            }
+            //세로일때 (x,y) (x+1,y)
+            if (s == 2) {
+                if (newx <= 0 || newx + 1 > N || newy <= 0 || newy > N) continue;
+
+                if (map[newx][newy] == 0 && map[newx + 1][newy] == 0) {
+                    if (arr[newx][newy][s] == -1) {
+                        arr[newx][newy][s] = arr[x][y][s] + 1;
+                        q.push({ {newx,newy},s });
+                    }
+                }
+            }
+
+        }
+
+        //회전이동
+        //가로로 되어있을때
+        if (s == 1) {
+            if (x + 1 <= N) {
+                //오른쪽아래
+                if (map[x + 1][y] == 0 && map[x + 1][y + 1] == 0 && arr[x][y + 1][2] == -1) {
+                    arr[x][y + 1][2] = arr[x][y][s] + 1;
+                    q.push({ {x,y + 1},2 });
+                }
+                //왼쪽아래
+                if (map[x + 1][y + 1] == 0 && map[x + 1][y] == 0 && arr[x][y][2] == -1) {
+                    arr[x][y][2] = arr[x][y][s] + 1;
+                    q.push({ {x,y},2 });
+                }
+            }
+
+            if (x - 1 > 0) {
+                //오른쪽 위 
+                if (map[x - 1][y] == 0 && map[x - 1][y + 1] == 0 && arr[x - 1][y + 1][2] == -1) {
+                    arr[x - 1][y + 1][2] = arr[x][y][s] + 1;
+                    q.push({ {x - 1,y + 1},2 });
+                }
+                //왼쪽 위
+                if (map[x - 1][y + 1] == 0 && map[x - 1][y] == 0 && arr[x - 1][y][2] == -1) {
+                    arr[x - 1][y][2] = arr[x][y][s] + 1;
+                    q.push({ {x - 1,y},2 });
+                }
+            }
+
+        }
+        //세로로 되어있을때
+        if (s == 2) {
+            if (y + 1 <= N) {
+                //오른쪽 아래
+                if (map[x][y + 1] == 0 && map[x + 1][y + 1] == 0 && arr[x + 1][y][1] == -1) {
+                    arr[x + 1][y][1] = arr[x][y][s] + 1;
+                    q.push({ {x + 1,y},1 });
+                }
+                //오른쪽 위
+                if (map[x + 1][y + 1] == 0 && map[x][y + 1] == 0 && arr[x][y][1] == -1) {
+                    arr[x][y][1] = arr[x][y][s] + 1;
+                    q.push({ {x ,y},1 });
+                }
+            }
+            if (y - 1 > 0) {
+                //왼쪽 아래
+                if (map[x][y - 1] == 0 && map[x + 1][y - 1] == 0 && arr[x + 1][y - 1][1] == -1) {
+                    arr[x + 1][y - 1][1] = arr[x][y][s] + 1;
+                    q.push({ {x + 1,y - 1},1 });
+                }
+                //왼쪽 위
+                if (map[x + 1][y - 1] == 0 && map[x][y - 1] == 0 && arr[x][y - 1][1] == -1) {
+                    arr[x][y - 1][1] = arr[x][y][s] + 1;
+                    q.push({ {x ,y - 1},1 });
+                }
+            }
+        }
+    }
+}
+int solution(vector<vector<int>> board) {
+
+    N = board.size();
+
+    //맵 복사
+    for (int x = 1; x <= N; x++) {
+        for (int y = 1; y <= N; y++) {
+            map[x][y] = board[x - 1][y - 1];
+        }
+    }
+
+    //BFS
+    BFS();
+    int answer = 987654321;
+
+    if (arr[N - 1][N][2] != -1) answer = min(answer, arr[N - 1][N][2]);
+    if (arr[N][N - 1][1] != -1) answer = min(answer, arr[N][N - 1][1]);
+    return answer;
+}
