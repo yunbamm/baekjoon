@@ -1,0 +1,72 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <queue>
+using namespace std;
+
+priority_queue<int> pq;
+//운행횟수 , 운행간격 , 한번에 탈수있는 사람수 , 대기시간
+string solution(int n, int t, int m, vector<string> timetable) {
+    for (int i = 0; i < timetable.size(); i++) {
+        string now = timetable[i];
+
+        string tmp;
+        for (int j = 0; j < now.size(); j++) {
+            if (now[j] == ':') continue;
+            tmp += now[j];
+        }
+
+        pq.push(-stoi(tmp));
+    }
+
+    //9시 시작
+    int now = 900;
+    int count = 0;
+    int last = now;
+    bool flag = false;
+    //마지막사람이 줄선 시간을 구한다
+    //셔틀 운행
+    while (n--) {
+
+        //대기하는 사람이 있고 , 그 사람이 셔틀보다 빨리와 대기했고 , 더 태울수있으면
+        while (!pq.empty() && -pq.top() <= now && count < m) {
+            last = -pq.top();
+            pq.pop();
+            count++;
+        }
+
+        //1.셔틀 운행 마지막순서에 탈 자리가 남아있으면
+        if (n==0 && count < m) {
+            last = now;
+            flag = true;
+        }
+
+        //셔틀 운행이 끝나면
+        if (n == 0) break;
+        //한 셔틀운행이 끝나면
+        now += t;
+        if (now % 100 >= 60) {
+            now -= 60;
+            now += 100;
+        }
+        count = 0;
+    }
+    string answer = "";
+    //마지막 셔틀운행시간에 타면 되는경우
+    if (flag);
+    //마지막 순서보다 빨리 와야된다
+    else {
+        if (last % 100 == 0) {
+            last += 59;
+            last -= 100;
+        }
+        else last--;
+    }
+    answer += to_string(last / 1000);
+    answer += to_string((last % 1000) / 100);
+    answer += ":";
+    answer += to_string((last % 100) / 10);
+    answer += to_string(last % 10);
+
+    return answer;
+}
