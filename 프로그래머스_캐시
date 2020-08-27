@@ -1,0 +1,48 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int cacheSize, vector<string> cities) {
+    int answer = 0;
+
+    //cache
+    vector<string> cache;
+
+    //순서대로 처리 (다 소문자로 바꿔서 하자)
+    for (int i = 0; i < cities.size(); i++) {
+        string now = cities[i];
+        for (int j = 0; j < now.size(); j++) {
+            if ('A' <= now[j] && now[j] <= 'Z') {
+                now[j] += 32;
+            }
+        }
+
+        bool flag = false;
+        for (int j = 0; j < cache.size(); j++) {
+            //cache hit시 최신으로 update
+            if (now == cache[j]) {
+                cache.erase(cache.begin() + j);
+                cache.push_back(now);
+                answer++;
+                flag = true;
+                break;
+            }
+        }
+
+        //cache miss시 (5)
+        if (!flag) {
+            answer += 5;
+            //cache가꽉찼으면
+            if (cache.size() == cacheSize) {
+                //cache 0 이면
+                if (cacheSize != 0) {
+                    cache.erase(cache.begin());
+                    cache.push_back(now);
+                }
+            }
+            else cache.push_back(now);
+        }
+    }
+    return answer;
+}
