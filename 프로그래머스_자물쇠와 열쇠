@@ -1,0 +1,117 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+
+//key는 M * M , lock은 N * N
+//완전탐색
+//key를 회전한다음 lock의 좌표에 가져다 대본다
+//열수있으면 true , 없으면 false
+
+int lock_arr[20][20];
+int key_arr[20][20];
+
+//사이즈를 알아야한다
+void process(int ksize) {
+    int tmp_key[20][20];
+
+    int i = 0, j = 0;
+
+    for (int y = 0; y < ksize; y++) {
+        for (int x = ksize - 1; x >= 0; x--) {
+            tmp_key[i][j] = key_arr[x][y];
+            j++;
+        }
+        j = 0;
+        i++;
+    }
+
+    //복사
+    for (int x = 0; x < ksize; x++) {
+        for (int y = 0; y < ksize; y++) {
+            key_arr[x][y] = tmp_key[x][y];
+        }
+    }
+}
+//시작위치를 알려준다
+//key의 ( 0 , 0 )과 lock의 (0 + s_x , 0 + s_y ) 가 매치된다
+
+bool match(int s_x, int s_y, int ksize, int lsize) {
+    int tmp[20][20];
+
+    //tmp에 lock을 복사
+    for (int x = 0; x < lsize; x++) {
+        for (int y = 0; y < lsize; y++) {
+            tmp[x][y] = lock_arr[x][y];
+        }
+    }
+
+    //처리
+    //겹치면 2 , 맞으면 1 , 비면 0
+    for (int x = 0; x < ksize; x++) {
+        for (int y = 0; y < ksize; y++) {
+            //좌표가 벗어나면 무시 
+            if (x + s_x < 0 || x + s_x >= lsize || y + s_y < 0 || y + s_y >= lsize) continue;
+
+            //홈이면
+            if (key_arr[x][y] == 0) continue;
+
+            //돌기인데 
+            //홈이면
+            if (tmp[x + s_x][y + s_y] == 0) {
+                tmp[x + s_x][y + s_y] = 1;
+            }
+            //돌기면
+            else {
+                tmp[x + s_x][y + s_y] = 2;
+            }
+        }
+    }
+
+    //다 탐색하면서 1이아닌부분이 있으면 false
+    for (int x = 0; x < lsize; x++) {
+        for (int y = 0; y < lsize; y++) {
+            if (tmp[x][y] != 1) return false;
+        }
+    }
+
+    return true;
+
+}
+bool solution(vector<vector<int>> key, vector<vector<int>> lock) {
+    bool answer = false;
+
+    int ksize = key.size();
+    int lsize = lock.size();
+
+    //입력받은거
+    for (int x = 0; x < ksize; x++) {
+        for (int y = 0; y < ksize; y++) {
+            key_arr[x][y] = key[x][y];
+        }
+    }
+    for (int x = 0; x < lsize; x++) {
+        for (int y = 0; y < lsize; y++) {
+            lock_arr[x][y] = lock[x][y];
+        }
+    }
+    //회전하고 매칭
+    for (int i = 0; i < 4; i++) {
+
+        process(ksize);
+
+        //매칭할때 0부터 하는게 아니다 ( + 부분으로만 움직일수 있는게 아니라 -부분까지 움직일수있어서)
+        for (int x = -lsize + 1; x < lsize; x++) {
+            for (int y = -lsize + 1; y < lsize; y++) {
+                if (match(x, y, ksize, lsize)) {
+                    answer = true;
+                    break;
+                }
+            }
+            if (answer) break;
+        }
+    }
+    return answer;
+}
