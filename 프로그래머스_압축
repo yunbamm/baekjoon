@@ -1,0 +1,72 @@
+#include <string>
+#include <vector>
+#include<iostream>
+using namespace std;
+
+vector<pair<string, int>> v;
+int tmp_num = 1;
+int index = 0;
+vector<int> answer;
+
+string process(int i, string msg) {
+
+    string now;
+    now += msg[i];
+
+    string tmp = now;
+    for (int j = i + 1; j < msg.size(); j++) {
+        tmp += msg[j];
+
+        //사전에 있으면 flag = true;
+        bool flag = false;
+        for (int k = 0; k < v.size(); k++) {
+            if (tmp == v[k].first) {
+                now = tmp;
+                index++;
+                flag = true;
+            }
+        }
+
+        if (!flag) break;
+    }
+
+    return now;
+}
+vector<int> solution(string msg) {
+
+    //1. 사전초기화 
+    for (char c = 'A'; c <= 'Z'; c++) {
+        string s;
+        s += c;
+        v.push_back({ s,tmp_num });
+        tmp_num++;
+    }
+
+    while (1)
+    {
+        //2.현재입력과 일치하는 사전에 존재하는 가장 긴 문자열
+        string w = process(index , msg);
+
+        //3.해당하는 문자열의 번호를 answer에 push
+        for (int i = 0; i < v.size(); i++) {
+            if (w == v[i].first) {
+                answer.push_back(v[i].second);
+                break;
+            }
+        }
+
+        //index가 마지막이면 끝
+        if (index == msg.size() - 1) break;
+
+        //4. w + 다음문자열을 저장
+        index++;
+        w += msg[index];
+        v.push_back({ w,tmp_num });
+        tmp_num++;
+    }
+    for (int i = 0; i < answer.size(); i++) {
+        cout << answer[i] << " ";
+    }
+
+    return answer;
+}
