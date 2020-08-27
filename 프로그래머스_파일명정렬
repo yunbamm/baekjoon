@@ -1,0 +1,62 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+vector<string> solution(vector<string> files) {
+
+    vector<string> info;            //i번째 들어온 문자열 저장
+
+    //대문자를 소문자로 바꿔서
+    //head , 숫자 , 들어온 순서
+    vector<pair<pair<string, int>, int>> v;
+
+    for (int i = 0; i < files.size(); i++) {
+        string now = files[i];
+        string head, number;
+        info.push_back(now);
+        bool flag = false;          //false면 head부분
+        bool check = false;         //true면 tail부분
+
+        //head에는 문자만 , number에는 숫자만 ,tail에는 아무거나 가능
+        for (int j = 0; j < now.size(); j++) {
+            //tail이면 건너뜀
+            if (check) continue;
+
+            //tail이 아닌데 숫자가 나오면 number부분
+            else if ('0' <= now[j] && now[j] <= '9') {
+                flag = true;
+                number += now[j];
+            }
+            //head이면
+            else if (!flag) {
+                //소문자로 바꿔서 넣는다
+                if ('A' <= now[j] && now[j] <= 'Z') {
+                    head += now[j] + 32;
+                }
+                else head += now[j];
+            }
+            //head가 아니면 (숫자가 나온뒤에 문자가 온경우) tail로 취급
+            else check = true;
+
+        }
+
+        v.push_back({ {head,stoi(number) },i });
+    }
+
+    sort(v.begin(), v.end());
+    vector<string> answer;
+
+    for (int i = 0; i < v.size(); i++) {
+        int index = v[i].second;
+        cout << v[i].first.first << " , " << v[i].first.second << "\n";
+        answer.push_back(info[index]);
+
+    }
+
+    for (int i = 0; i < answer.size(); i++) {
+        cout << answer[i] << "\n";
+    }
+    return answer;
+}
