@@ -1,0 +1,82 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include <iostream>
+using namespace std;
+
+struct Node
+{
+    int num;
+    int x;
+    Node* left = NULL;
+    Node* right = NULL;
+    Node();
+    Node(int n,int x) {
+        this->num = n;
+        this->x = x;
+    }
+};
+
+void insert(Node* now , int x ,int index) {
+
+    while (1) {
+
+        if (now->x < x) {
+            if (now->right == NULL) {
+                now->right = new Node(index, x);
+                break;
+            }
+            else now = now->right;
+        }
+
+        else {
+            if (now->left == NULL) {
+                now->left = new Node(index, x);
+                break;
+            }
+            else now = now->left;
+        }
+    }
+}
+vector<int> pre;
+vector<int> post;
+void preorder(Node * now ) {
+
+    pre.push_back(now->num);
+    if (now->left != NULL) preorder(now->left);
+    if (now->right != NULL) preorder(now->right);
+}
+
+void postorder(Node * now) {
+    if (now->left != NULL) postorder(now->left);
+    if (now->right != NULL) postorder(now->right);
+
+    post.push_back(now->num);
+}
+//y , x  , index
+priority_queue<pair<pair<int, int>, int>> pq;
+
+vector<vector<int>> solution(vector<vector<int>> nodeinfo) {
+
+    for (int i = 0; i < nodeinfo.size(); i++) {
+        int x = nodeinfo[i][0];
+        int y = nodeinfo[i][1];
+        int index = i + 1;
+        pq.push({ {y,x},index });
+    }
+
+    //root 먼저 생성
+    Node* root = new Node(pq.top().second , pq.top().first.second);
+    pq.pop();
+
+    while (!pq.empty()) {
+        insert(root , pq.top().first.second , pq.top().second);
+        pq.pop();
+    }
+    vector<vector<int>> answer;
+    preorder(root);
+    postorder(root);
+    answer.push_back(pre);
+    answer.push_back(post);
+    return answer;
+}
