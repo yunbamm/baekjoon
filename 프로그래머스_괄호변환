@@ -1,0 +1,89 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<stack>
+
+using namespace std;
+
+//올바른 문자열인지 check
+bool check(string s) {
+
+    stack<int> st;
+
+    for (int i = 0; i < s.size(); i++) {
+
+        if (st.empty()) st.push(s[i]);
+
+        else if (s[i] == '(') st.push(s[i]);
+
+        else {
+            if (st.top() == '(') st.pop();
+            else st.push(s[i]);
+        }
+    }
+
+    if (st.empty()) return true;
+    else return false;
+}
+
+//w를 u, v로 분리
+string func(string w) {
+
+    int num1 = 0, num2 = 0;
+
+    string u;
+
+    for (int i = 0; i < w.size(); i++) {
+        u += w[i];
+        if (w[i] == '(') num1++;
+        else num2++;
+
+        if (num1 == num2) break;
+    }
+
+    return u;
+}
+string process(string w) {
+
+    if (w == "") return w;
+
+    //u , v로 분리
+    string u = func(w);
+    string v;
+    for (int i = u.size(); i < w.size(); i++) {
+        v += w[i];
+    }
+    string tmp;
+    //u가 올바른 문자열이면
+    if (check(u)) {
+        tmp += u;
+        tmp += process(v);
+    }
+    //아니라면
+    else {
+        tmp += '(';
+        tmp += process(v);
+        tmp += ')';
+
+        //첫번째 마지막빼고 방향 뒤집어서 붙힌다
+        for (int i = 0; i < u.size(); i++) {
+            if (i == 0 || i == u.size() - 1) continue;
+
+            if (u[i] == '(') tmp += ')';
+            else tmp += '(';
+        }
+
+        return tmp;
+    }
+    return tmp;
+}
+string solution(string p) {
+
+    string answer = "";
+    answer += process(p);
+    return answer;
+}
+
+int main() {
+
+}
