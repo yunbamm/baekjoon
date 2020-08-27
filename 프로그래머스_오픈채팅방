@@ -1,0 +1,61 @@
+#include <string>
+#include <vector>
+#include <map>
+using namespace std;
+
+//user_id는 다 다르다
+//Enter 유저아이디 닉네임
+//Leave 유저아이디 
+//Change 유저아이디 닉네임
+
+//아이디, 상태 1(enter) 2 (leave)
+vector<pair<string, int>> v;
+
+//아이디 , 닉네임
+vector<pair<string, string>> info;
+map<string, string> m;
+
+vector<string> solution(vector<string> record) {
+
+    for (int i = 0; i < record.size(); i++) {
+        string now = record[i];
+        string id, name;
+        int n;
+
+        int tmp = 0;
+        for (int j = 0; j < now.size(); j++) {
+
+            if (now[j] == ' ') tmp++;
+            else if (tmp == 1) id += now[j];
+            else if (tmp == 2) name += now[j];
+        }
+
+        //들어오거나 변경이면 info를 봐서 닉네임을 수정
+        if (now[0] == 'E' || now[0] == 'C') {
+            //현재 info안에 id가 있는지 없는지
+            //없다면
+            if (m.find(id) != m.end()) {
+                m.find(id)->second = name;
+            }
+            else m.insert({ id,name });
+        }
+
+
+        if (now[0] == 'E') v.push_back({ id, 1 });
+        if (now[0] == 'L') v.push_back({ id,2 });
+
+    }
+    vector<string> answer;
+
+    for (int i = 0; i < v.size(); i++) {
+        string tmp;
+        string id = v[i].first;
+
+        tmp+=m.find(id)->second;
+        if (v[i].second == 1) tmp += "님이 들어왔습니다.";
+        if (v[i].second == 2) tmp += "님이 나갔습니다.";
+
+        answer.push_back(tmp);
+    }
+    return answer;
+}
