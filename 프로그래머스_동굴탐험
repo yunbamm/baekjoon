@@ -1,0 +1,78 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+//degree
+int degree[200001] = { 0 };
+vector<int> v[200001];			//연결된 통로
+vector<int> post[200001];		//후행인 방
+bool check[200001];
+queue<int> q;
+int answer_count = 0;
+
+void topology() {
+
+	//통로로 연결된 방을 간다
+	//만약 degree가 0이아니라면 check만 해주고 q에는 집어넣지 않는다
+	//후행인 방들을 볼때 degree가 0이 되는데 check가 true이면 q에 넣는다
+	while (!q.empty()) {
+		int now = q.front();
+		q.pop();
+
+		answer_count++;
+		//후행방들 처리
+		for (int i = 0; i < post[now].size(); i++) {
+			int tmp = post[now][i];
+			
+			//선행방을 들렸고 이미 들린적이 있으면
+			if (--degree[tmp] == 0 && check[tmp]) {
+				q.push(tmp);
+			}
+		}
+		//통로로 연결된 방 보기
+		for (int i = 0; i < v[now].size(); i++) {
+			int next = v[now][i];
+
+			//이미 들린방이면 무시
+			if (check[next]) continue;
+
+			check[next] = true;
+
+			//선행방 조건이 없으면
+			if (degree[next] == 0) q.push(next);
+		}
+	}
+}
+//방개수 ,  통로 정보 , 선행순서
+bool solution(int n, vector<vector<int>> path, vector<vector<int>> order) {
+
+	//통로 정보 저장
+	for (int i = 0; i < path.size(); i++) {
+		int src = path[i][0];
+		int dest = path[i][1];
+
+		v[src].push_back(dest);
+		v[dest].push_back(src);
+	}
+	//선 , 후행방 정보 저장
+	for (int i = 0; i < order.size(); i++) {
+		int A = order[i][0];
+		int B = order[i][1];
+
+		post[A].push_back(B);
+		degree[B]++;
+	}
+
+	q.push(0);
+	check[0] = true;
+	topology();
+
+	bool answer = true;
+
+	if (answer_count != n) answer = false;
+
+	return answer;
+}
