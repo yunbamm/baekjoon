@@ -1,0 +1,93 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<stack>
+#include<algorithm>
+
+using namespace std;
+
+//stack , 문자열 , 비교시작index, 비교 크기
+bool process(stack<char> st , string s ,int now , int tmp) {
+
+	stack<char>tmp_st;
+
+	for (int i = 0; i < tmp; i++) {
+		tmp_st.push(st.top());
+		st.pop();
+	}
+
+	string com;
+	//비교되는 문자열 만들기
+	while (!tmp_st.empty())
+	{
+		com += tmp_st.top();
+		tmp_st.pop();
+	}
+	bool flag = true;
+	for (int i = 0; i < tmp; i++) {
+		if (com[i] != s[i + now]) {
+			flag = false;
+			break;
+		}
+	}
+
+	//만약 압축이 된다면
+	if (flag) return true;
+
+	return false;
+
+}
+//크기가 1 ~ half일때까지
+int solution(string s) {
+	int answer = s.size();
+
+	int half = s.size() / 2;
+
+	//크기가 i일때
+	for (int i = 1; i <= half; i++) {
+		stack<char> st;
+		int tmp = 0;			//arr의index
+		int arr[1001] = { 0 };	//몇번 압축되는지 표시
+		int answer_tmp = 0;		//정답 후보 구하기
+
+		//1로초기화
+		for (int j = 0; j <= 1000; j++) arr[j] = 1;
+
+		int now = 0;
+		while (now + i <= s.size()) {
+			//초기엔 비교대상이 없다
+			if (st.empty()) {
+				for (int j = 0; j < i; j++) {
+					st.push(s[now]);
+					now++;
+				}
+			}
+			//비교대상 존재시
+			else {
+				//압축된다면
+				if (process(st, s, now, i)) {
+					arr[tmp]++;
+				}
+				//안된다면 뒤에꺼를 st에 push
+				else {
+					for (int j = now; j < now + i; j++) st.push(s[j]);
+					tmp++;
+				}
+				now += i;
+			}
+		}
+		
+		//끝까지 못봤으면 남은 문자열 push
+		for (int j = now; j < s.size(); j++) st.push(s[j]);
+		//다했을때 압축된 문자열 확인
+		for (int i = 0; i <= tmp; i++) {
+			if (arr[i] > 1) {
+				string tmp_arr = to_string(arr[i]);
+				answer_tmp += tmp_arr.size();
+			}
+		}
+		answer_tmp += st.size();
+		answer = min(answer, answer_tmp);
+	}
+	return answer;
+}
