@@ -1,0 +1,112 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<algorithm>
+
+using namespace std;
+
+//시작점을 true로
+bool gi[101][101];
+bool bo[101][101];
+
+//기둥 설치
+bool make_gi(int x,  int y) {
+	//바닥위
+	if (y == 0) return true;
+
+	//보의 한쪽 끝 위거나 
+	if (bo[x - 1][y] || bo[x][y]) return true;
+
+	//또다른 기둥위
+	if (gi[x][y - 1]) return true;
+
+	return false;
+}
+//보 설치
+bool make_bo(int x, int y) {
+	//한쪽 끝부분이 기둥위
+	if (gi[x + 1][y - 1] || gi[x][y - 1]) return true;
+	//양쪽이 다른보와 연결
+	if (bo[x - 1][y] && bo[x + 1][y]) return true;
+
+	return false;
+}
+vector<vector<int>> solution(int n, vector<vector<int>> build_frame) {
+
+	//gi , bo 초기화
+	for (int i = 0; i < 101; i++) {
+		for (int j = 0; j < 101; j++) {
+			gi[i][j] = false;
+			bo[i][j] = false;
+		}
+	}
+	//입력 받아오기
+	for (int i = 0; i < build_frame.size(); i++) {
+		int x = build_frame[i][0];
+		int y = build_frame[i][1];
+		int a = build_frame[i][2];
+		int b = build_frame[i][3];
+
+		//설치
+		if (b == 1) {
+			//기둥을 설치할수있으면
+			if (a == 0 && make_gi(x, y)) {
+				gi[x][y] = true;
+			}
+			//보를 설치할수있으면
+			if (a == 1 && make_bo(x, y)) {
+				bo[x][y] = true;
+			}
+		}
+		//삭제
+		//명령으로 들어온 걸 삭제하고 나머지 모든 부분에 대해서 설치가 가능하다면
+		if (b == 0) {
+			//기둥을 삭제
+			if (a == 0) gi[x][y] = false;
+			if (a == 1) bo[x][y] = false;
+
+			//false면 삭제 불가능
+			bool flag = true;
+			//남아있는 모든 기둥과 보가 설치가능한지
+			for (int tmpx = 0; tmpx < 101; tmpx++){
+				for (int tmpy = 0; tmpy < 101; tmpy++) {
+					//기둥이나 보가 있다면 설치가능한지 본다
+					if (gi[tmpx][tmpy]) {
+						if (!make_gi(tmpx, tmpy)) {
+							flag = false;
+							break;
+						}
+					}
+					if (bo[tmpx][tmpy]) {
+						if (!make_bo(tmpx, tmpy)) {
+							flag = false;
+							break;
+						}
+					}
+				}
+
+				if (!flag) break;
+			}
+
+			//삭제 불가능이면 삭제하지 않는다
+			if (!flag) {
+				if (a == 0) gi[x][y] = true;
+				if (a == 1) bo[x][y] = true;
+			}
+		}
+	}
+
+	vector<vector<int>> answer;
+	for (int i = 0; i < 101; i++) {
+		for (int j = 0; j < 101; j++) {
+			if (gi[i][j]) answer.push_back({ i , j , 0 });
+			if (bo[i][j]) answer.push_back({ i , j , 1 });
+			
+		}
+	}
+
+	sort(answer.begin(), answer.end());
+
+	return answer;
+
+}
