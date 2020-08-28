@@ -1,0 +1,102 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+//11
+
+//0(아무대나 상관없음) 1(위,아래) 2(좌,우)
+int N;		//N*N
+int map[25][25];				//0(빈칸) 1(벽)
+int arr[25][25][2];		//총비용 (좌표 , 방향 위아래(0) , 좌 우 (1)) 
+pair<int, int> p[4] = { {1,0},{-1,0},{0,1},{0,-1} };
+
+void BFS() {
+
+	//arr초기화 
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			arr[i][j][0] = 987654321;
+			arr[i][j][1] = 987654321;
+		}
+	}
+
+	//좌표 , 지금까지 도로방향
+	queue<pair<pair<int,int> , int>> q;
+	q.push({ {0,0},0 });
+	q.push({ {0,0},1 });
+	arr[0][0][0] = 0;
+	arr[0][0][1] = 0;
+
+	while (!q.empty()) {
+		int x = q.front().first.first;
+		int y = q.front().first.second;
+		int z = q.front().second;
+		int sum = arr[x][y][z];
+
+		q.pop();
+
+		//0,1(아래,위) 2,3(좌,우)
+		for (int i = 0; i < 4; i++) {
+			int newx = x + p[i].first;
+			int newy = y + p[i].second;
+
+			//좌표를 벗어나면 무시
+			if (newx < 0 || newx >= N || newy < 0 || newy >= N) continue;
+
+			//벽이면 무시
+			if (map[newx][newy]) continue;
+			
+			//위 ,아래도로일때
+			if (z == 0) {
+				//위,아래
+				if (i == 0 || i == 1) {
+					if (arr[newx][newy][0] > sum + 100) {
+						arr[newx][newy][0] = sum + 100;
+						q.push({ {newx,newy},0 });
+					}
+				}
+				//좌,우
+				else {
+					if (arr[newx][newy][1] > sum + 600) {
+						arr[newx][newy][1] = sum + 600;
+						q.push({ {newx,newy }, 1 });
+					}
+				}
+			}
+			//좌 ,우 도로일때
+			else if (z == 1) {
+				//위,아래
+				if (i == 0 || i == 1) {
+					if (arr[newx][newy][0] > sum + 600) {
+						arr[newx][newy][0] = sum + 600;
+						q.push({ {newx,newy},0 });
+					}
+				}
+				//좌,우
+				else {
+					if (arr[newx][newy][1] > sum + 100) {
+						arr[newx][newy][1] = sum + 100;
+						q.push({ {newx,newy }, 1 });
+					}
+				}
+			}
+		}
+	}
+}
+int solution(vector<vector<int>> board) {
+	N = board.size();
+
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			map[i][j] = board[i][j];
+		}
+	}
+	BFS();
+	int answer = 0;
+
+	answer = min(arr[N - 1][N - 1][0], arr[N - 1][N - 1][1]);
+	return answer;
+}
