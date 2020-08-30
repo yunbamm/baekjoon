@@ -1,0 +1,136 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+//일단 숫자 , 문자 따로 저장해둔다
+vector<long long> num;
+vector<char> op;
+
+//임시 저장
+queue<long long> q_num;
+queue<char> q_op;
+
+queue<long long> result_num;
+queue<char> result_op;
+
+void process(char c) {
+
+	bool flag = false;		//true면 n1이 이미존재
+
+	long long n1, n2;
+	while (!q_op.empty()) {
+		char now_op = q_op.front();
+		q_op.pop();
+		
+		//n1이 없다면
+		if (!flag) {
+			flag = true;
+			n1 = q_num.front();
+			q_num.pop();
+		}
+		n2 = q_num.front();
+		q_num.pop();
+
+		//만약 now_op가 c라면 연산
+		if (now_op == c) {
+			if (c == '+') n1 = n1 + n2;
+			if (c == '-') n1 = n1 - n2;
+			if (c == '*') n1 = n1 * n2;
+
+			if (q_op.empty()) result_num.push(n1);
+		}
+		//무시
+		else {
+			result_num.push(n1);
+			result_op.push(now_op);
+			n1 = n2;
+
+			if (q_op.empty()) result_num.push(n1);
+		}
+	}
+	//여기서 애초에 result에 있는걸 옮겨준다
+	while (!result_num.empty()) {
+		q_num.push(result_num.front());
+		result_num.pop();
+	}
+	while (!result_op.empty()) {
+		q_op.push(result_op.front());
+		result_op.pop();
+	}
+}
+long long solution(string expression) {
+	
+	//수따로 , 연산자 따로 분리
+	long long tmp = 0;
+	char c;
+	for (int i = 0; i < expression.size(); i++) {
+		c = expression[i];
+
+		if (c == '+' || c == '*' || c == '-') {
+			num.push_back(tmp);
+			op.push_back(c);
+			tmp = 0;
+		}
+		else {
+			tmp *= 10;
+			tmp += c - '0';
+		}
+	}
+	//마지막 저장
+	num.push_back(tmp);
+
+	long long answer = 0;
+
+	//* + - 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('*');
+	process('+');
+	process('-');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	//* - + 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('*');
+	process('-');
+	process('+');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	//+ * - 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('+');
+	process('*');
+	process('-');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	//+ - * 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('+');
+	process('-');
+	process('*');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	//- + * 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('-');
+	process('+');
+	process('*');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	//- * + 일때
+	for (int i = 0; i < num.size(); i++) q_num.push(num[i]);
+	for (int i = 0; i < op.size(); i++) q_op.push(op[i]);
+	process('-');
+	process('*');
+	process('+');
+	answer = max(answer, abs(q_num.front()));
+	q_num.pop();
+	return answer;
+}
