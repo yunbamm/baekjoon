@@ -1,0 +1,66 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+using namespace std;
+
+//1. 우선 보석들을 보면서 겹치지 않는 보석 개수를 구하고 map에 저장한다
+//2. 투포인터 이용? i를 확인해서 second가 2이상이면 
+
+map<string, int> m;
+int N = 0;
+
+vector<int> solution(vector<string> gems) {
+	
+	//1단계
+	for (int i = 0; i < gems.size(); i++) {
+		string now = gems[i];
+
+		//m안에 있으면 무시
+		if (m.find(now) != m.end()) continue;
+		//없으면 추가
+		else {
+			m.insert({ now, 0 });
+			N++;
+		}
+	}
+	vector<int> answer;
+
+	//2단계 
+	int i = 0, j = 0;
+	int count = 0;
+	bool check[100000];
+	int tmp_answer = 987654321;		//범위 크기
+	int start = 0, end = 0;
+	//check초기화
+	for (int a = 0; a < 100000; a++) check[a] = false;
+
+	//j를 추가해주고 , i를 확인한다
+	while (j < gems.size() && i<= j) {
+		//j추가(처리한적이 없으면)
+		string tmp = gems[j];
+		if (!check[j]) {
+			check[j] = true;
+			if(++m.find(tmp)->second == 1) count++;
+		}
+		//만약 보석을 전부 포함 한다면
+		if (count == N) {
+			if (tmp_answer > j - i) {
+				start = i;
+				end = j;
+				tmp_answer = j - i;
+			}
+		}
+		//i를 봐서 이미 1초과면 i++ , 아니면 j++
+		if (m.find(gems[i])->second > 1) {
+			m.find(gems[i])->second--;
+			i++;
+		}
+		else j++;
+	}
+
+	answer.push_back(start + 1);
+	answer.push_back(end + 1);
+	return answer;
+}
