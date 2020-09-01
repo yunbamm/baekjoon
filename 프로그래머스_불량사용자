@@ -1,0 +1,80 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+//banned_id와 매칭되는 use_id를 찾는다
+//그냥 중복은 따로 계산해주자
+//user_id , banned_id는 8이하
+bool user[8];		//true면 이미 사용
+bool ban[8];		//true면 이미 매칭
+
+int N;				//banned_id개수
+vector<int> v;		//매칭된 user_index를 넣는다
+vector<int> answer_v;		//중복이 제거된 벡터
+
+//s와 tmp가 일치하는지
+bool check(string s, string tmp) {
+
+	//길이가 다르면 false
+	if (s.size() != tmp.size()) return false;
+
+	for (int i = 0; i < s.size(); i++) {
+		if (tmp[i] == '*') continue;
+		else if (s[i] != tmp[i]) return false;
+	}
+	return true;
+}
+//현재 ban_id와 일치하는 user_id를 찾는다
+void process(int user_index , vector<string> user_id, vector<string> ban_id) {
+	//매칭이 다됐으면
+	if (v.size() == ban_id.size()) {
+		//중복검사
+		int tmp = 0;
+		for (int i = 0; i < v.size(); i++) {
+			tmp |= (1 << v[i]);
+		}
+
+		bool flag = true;
+		for (int i = 0; i < answer_v.size(); i++) {
+			if (answer_v[i] == tmp) {
+				flag = false;
+				break;
+			}
+		}
+
+		if (flag) answer_v.push_back(tmp);
+		return;
+	}
+
+	//아직매칭안됐다면
+	for (int i = 0; i < ban_id.size(); i++) {
+		if (!ban[i]) {
+			//user_id를 탐색
+			for (int j = user_index; j < user_id.size(); j++) {
+				if (user[j]) continue;		//이미 썼으면 무시
+				//일치하는걸 찾으면
+				if (check(user_id[j], ban_id[i])) {
+					ban[i] = true;
+					user[j] = true;
+					v.push_back(j);
+					process(j , user_id, ban_id);
+					user[j] = false;
+					v.pop_back();
+					ban[i] = false;
+				}
+			}
+		}
+	}
+}
+int solution(vector<string> user_id, vector<string> banned_id) {
+	N = banned_id.size();
+	int answer = 0;
+
+
+	process(0 ,user_id, banned_id);
+
+	answer = answer_v.size();
+	return answer;
+}
