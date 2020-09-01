@@ -1,0 +1,69 @@
+#include <string>
+#include <vector>
+#include<iostream>
+#include<algorithm>
+
+using namespace std;
+
+//ex{{1,2,3}, {2,1}}
+
+vector<int> solution(string s) {
+
+	vector<int> v[1000000];				//부분집합들이 저장되어있다
+	vector<pair<int, int>> info;		//원소 개수 , index
+	bool check[100001];					//해당 자연수를 이미 check했는지
+
+	//s를 통해 정보를 얻어오기위해 설정한 변수
+	bool start = false;
+	int index = 0;
+	int num = 0;
+	int count = 0;
+
+	//check초기화
+	for (int i = 0; i < 100001; i++) {
+		check[i] = false;
+	}
+
+	for (int i = 0; i < s.size(); i++) {
+		//시작이나 끝이면 무시 
+		if (i == 0 || i == s.size() - 1) continue;
+
+		if (!start && (s[i] == '{' || s[i] == ',')) start = true;
+		else if ('0' <= s[i] && s[i] <= '9') {
+			char c = s[i];
+			num *= 10;
+			num += c - '0';
+		}
+		else if (s[i] == ',') {
+			v[index].push_back(num);
+			count++;
+			num = 0;
+		}
+		else if (s[i] == '}') {
+			v[index].push_back(num);
+			count++;
+			start = false;
+			num = 0;
+			info.push_back({ count , index });
+			count = 0;
+			index++;
+		}
+	}
+
+	sort(info.begin(), info.end());
+
+	vector<int> answer;
+
+	//가장 작은 크기의 부분집합부터 본다
+	for (int i = 0; i < info.size(); i++) {
+		int now = info[i].second;
+
+		for (int j = 0; j < v[now].size(); j++) {
+			if (!check[v[now][j]]) {
+				check[v[now][j]] = true;
+				answer.push_back(v[now][j]);
+			}
+		}
+	}
+	return answer;
+}
