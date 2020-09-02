@@ -1,0 +1,62 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include <iostream>
+
+using namespace std;
+
+//edge는 간선정보
+
+vector<int> v[20001];
+queue<int> q;
+int dis[20001] = { 0 };
+
+void BFS() {
+
+	while (!q.empty()) {
+		int now = q.front();
+		q.pop();
+
+		//갈수있는곳 본다
+		for (int i = 0; i < v[now].size(); i++) {
+			int next = v[now][i];
+
+			if (dis[next] == -1) {
+				dis[next] = dis[now] + 1;
+				q.push(next);
+			}
+			
+		}
+	}
+}
+int solution(int n, vector<vector<int>> edge) {
+	
+	//dis초기화
+	for (int i = 1; i <= n; i++) dis[i] = -1;
+
+	for (int i = 0; i < edge.size(); i++) {
+		int src = edge[i][0];
+		int dest = edge[i][1];
+
+		v[src].push_back(dest);
+		v[dest].push_back(src);
+	}
+
+	//1삽입
+	q.push(1);
+	dis[1] = 0;
+	
+	int max_dis = 0;
+
+	BFS();
+	//최고거리 구하기
+	for (int i = 1; i <= n; i++) max_dis = max(max_dis, dis[i]);
+	
+	cout << max_dis << "\n";
+	int answer = 0;
+
+	for (int i = 1; i <= n; i++) {
+		if (dis[i] == max_dis) answer++;
+	}
+	return answer;
+}
