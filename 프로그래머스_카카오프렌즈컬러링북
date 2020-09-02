@@ -1,0 +1,68 @@
+#include <vector>
+#include <queue>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+//몇개영역이 있는지 , 가장큰 영역의 넓이는 얼마인지
+//m * n 
+//0은 색칠 되어있지 않음
+
+// 전역 변수를 정의할 경우 함수 내에 초기화 코드를 꼭 작성해주세요.
+vector<int> solution(int m, int n, vector<vector<int>> picture) {
+	int arr[100][100] = { 0 };
+	bool check[100][100];
+	queue<pair<int, int>> q;
+	pair<int, int>p[4] = { {1,0},{0,1},{-1,0},{0,-1} };
+
+	//arr에 옮기기
+	for (int x = 0; x < picture.size(); x++) {
+		for (int y = 0; y < picture[x].size(); y++) {
+			arr[x][y] = picture[x][y];
+			check[x][y] = false;
+		}
+	}
+	int number_of_area = 0;
+	int max_size_of_one_area = 0;
+
+	//탐색 0이아니고 가본적이 없으면
+	for (int x = 0; x < picture.size(); x++) {
+		for (int y = 0; y < picture[x].size(); y++) {
+			if (arr[x][y] != 0 && !check[x][y]) {
+				number_of_area++;
+				check[x][y] = true;
+				q.push({ x,y });
+
+				int area_size = 0;
+
+				while (!q.empty()) {
+					int x = q.front().first;
+					int y = q.front().second;
+					int tmp = arr[x][y];
+					area_size++;
+					q.pop();
+
+					for (int i = 0; i < 4; i++) {
+						int newx = x + p[i].first;
+						int newy = y + p[i].second;
+
+						if (newx < 0 || newx >= m || newy < 0 || newy >= n) continue;
+
+						if (check[newx][newy] || tmp != arr[newx][newy]) continue;
+
+						check[newx][newy] = true;
+						q.push({ newx,newy });
+					}
+				}
+
+				max_size_of_one_area = max(area_size , max_size_of_one_area);
+			}
+		}
+	}
+	vector<int> answer(2);
+	answer[0] = number_of_area;
+	answer[1] = max_size_of_one_area;
+	
+	return answer;
+}
