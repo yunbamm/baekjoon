@@ -1,0 +1,116 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+//완전탐색
+// 1 ~ 컬럼개수 만큼 만든다
+//중복은 비트마스크를 통해 해결 (0~7)이니까
+
+string R[20][8];
+
+vector<int> v;		//컬럼 index
+bool check[8];
+int row, col;
+vector<int> answer_v;		//비트마스크를 이용해서 후보키를 가지고있는다
+int answer = 0;
+
+//false면 후보키 X
+bool process() {
+
+	vector<vector<string>> tmp_v;
+
+	//tmp_v에 tmp가 있는지 확인
+	for (int i = 0; i < row; i++) {
+		vector<string> tmp;
+
+		//해당 row에 col 정보를 tmp에 push
+		for (int j = 0; j < v.size(); j++) {
+			int tmp_col = v[j];
+			tmp.push_back(R[i][tmp_col]);
+		}
+		
+		bool flag1 = false;		//중복되는게 없다고 가정
+
+		//tmp_v를 확인
+		for (int j = 0; j < tmp_v.size(); j++) {
+
+			//한줄 확인
+			bool flag2 = true;		//같다고 가정
+			for (int k = 0; k < v.size(); k++) {
+				if (tmp[k] != tmp_v[j][k]) {
+					flag2 = false;
+					break;
+				}
+			}
+
+			//같은게 있으면
+			if (flag2) {
+				flag1 = true;
+				break;
+			}
+		}
+		//중복되는거니까
+		if (flag1) return false;
+
+		//중복안되면 push
+		tmp_v.push_back(tmp);
+	}
+	return true;
+}
+//조합만들기
+void make(int index , int N) {
+
+	//size가 N인 조합을 만들었으면 처리해준다
+	if (v.size() == N) {
+		
+		//최소성이 없는 후보키를 피하기위해
+		int c_key = 0;
+		for (int i = 0; i < v.size(); i++) {
+			int shift = v[i];
+			c_key |= (1 << shift);
+		}
+
+		//***중요 : 중복을 골라낼때 0 2 , 0 3 4 는 중복 X  / 0 2 , 0 2 4는 중복
+		//&를 했을때 answer_v[i]가 나오면?? 중복 이다
+		for (int i = 0; i < answer_v.size(); i++) {
+			if ((c_key & answer_v[i]) == answer_v[i]) return;
+		}
+
+		if (process()) {
+			answer++;
+			answer_v.push_back(c_key);
+		}
+		return;
+	}
+
+	for (int i = index; i < col; i++) {
+		if (!check[i]) {
+			check[i] = true;
+			v.push_back(i);
+			make(i , N);
+			v.pop_back();
+			check[i] = false;
+		}
+	}
+}
+int solution(vector<vector<string>> relation) {
+	
+	row = relation.size();
+	col = relation[0].size();
+
+	//relation복사
+	for (int i = 0; i < relation.size(); i++) {
+		for (int j = 0; j < relation[i].size(); j++) {
+			R[i][j] = relation[i][j];
+		}
+	}
+
+	//사이즈가 i인 조합을 만든다
+	for (int i = 1; i <= col; i++) {
+		make(0 ,i);
+	}
+
+	return answer;
+}
