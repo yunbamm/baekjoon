@@ -1,0 +1,49 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+using namespace std;
+
+
+//union_find?
+
+//1.우선 map을 만든다
+//원하는방 , 배정받을 방
+map<long long, long long> m;
+
+long long find(long long N) {
+	
+	//만약 N에 해당하는 정보가 없을때
+	if (m.find(N) == m.end()) {
+		m.insert({ N,N + 1});
+		return N + 1;
+	}
+	//만약 원하는 방에 배정받을 방이 같다면
+	if (N == m.find(N)->second) {
+		m.find(N)->second++;
+		return m.find(N)->second;
+	}
+	
+	return m.find(N)->second = find(m.find(N)->second);
+	
+}
+vector<long long> solution(long long k, vector<long long> room_number) {
+	vector<long long> answer;
+
+	//원하는 방들을 본다
+	for (int i = 0; i < room_number.size(); i++) {
+		long long now = room_number[i];
+		//없다면 insert 
+		if (m.find(now) == m.end()) {
+			m.insert({ now, now });
+		}
+	}
+	//입력값들을 확인하면서 배정받을 방을 update
+	for (int i = 0; i < room_number.size(); i++) {
+		long long now = room_number[i];
+		
+		answer.push_back(find(now) - 1);
+	}
+	return answer;
+}
