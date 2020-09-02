@@ -1,0 +1,96 @@
+#include <string>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+
+using namespace std;
+
+//1 .str1 , str2에서 문자만 고른다 (모두 대문자로 : 소문자면 -32)
+//2. 두글자씩 끊어서 집합 만들기
+//3. m1을 보면서 합집합 개수 초기화
+
+map<string, int> m1;
+map<string, int> m2;
+
+int solution(string str1, string str2) {
+
+	string tmp = "";
+	//2. 두글자씩 집합만들기
+	for (int i = 0; i < str1.size() - 1; i++) {
+		tmp = "";
+		char now = str1[i];
+		char next = str1[i + 1];
+
+		//소문자면 대문자로
+		if ('a' <= now && now <= 'z') now = now - 32;
+		if ('a' <= next && next <= 'z') next = next - 32;
+
+		//둘다 문자면
+		if ('A' <= now && now <= 'Z' && 'A' <= next && next <= 'Z') {
+			tmp += now;
+			tmp += next;
+
+			//tmp가 이미있나 찾아본다
+			//이미 있으면
+			if (m1.find(tmp) != m1.end()) {
+				m1.find(tmp)->second++;
+			}
+			else {
+				m1.insert({ tmp,1 });
+			}
+		}
+	}
+	for (int i = 0; i < str2.size() - 1; i++) {
+		tmp = "";
+		char now = str2[i];
+		char next = str2[i + 1];
+
+		//소문자면 대문자로
+		if ('a' <= now && now <= 'z') now = now - 32;
+		if ('a' <= next && next <= 'z') next = next - 32;
+		if ('A' <= now && now <= 'Z' && 'A' <= next && next <= 'Z') {
+			tmp += now;
+			tmp += next;
+
+			//tmp가 이미있나 찾아본다
+			//이미 있으면
+			if (m2.find(tmp) != m2.end()) {
+				m2.find(tmp)->second++;
+			}
+			else {
+				m2.insert({ tmp,1 });
+			}
+		}
+	}
+
+	double hap = 0;
+	double gue = 0;
+	//3. m1을 보면서 합집합 개수 초기화
+	map<string, int>::iterator iter;
+	for (iter = m1.begin(); iter != m1.end(); iter++) {
+		hap += iter->second;
+	}
+	//4. m2를 보면서 교집합 합지합 개수 update
+	for (iter = m2.begin(); iter != m2.end(); iter++) {
+		tmp = iter->first;
+		int num = iter->second;
+		
+
+		//만약 tmp가 m1에 없으면 합집합에 추가
+		if (m1.find(tmp) == m1.end()) {
+			hap += num;
+		}
+		//m1에 있으면 교집합은 num와 m1.second의 최소 
+		else {
+			gue += min(num, m1.find(tmp)->second);
+			hap -= m1.find(tmp)->second;
+			hap += max(num, m1.find(tmp)->second);
+		}
+	}
+	int answer = 0;
+
+	if (gue == 0 && hap == 0) answer = 65536;
+	else answer = (gue / hap) * 65536;
+	return answer;
+}
