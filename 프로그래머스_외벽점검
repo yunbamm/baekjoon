@@ -1,0 +1,89 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+//외벽은 n미터 , 취약지점 존재
+//취약지점에 친구들을 파견하자 (시계방향 or 반시계 방향)
+//외벽길이 : n , 취약지점 : weak , 친구 이동거리 : dist
+//취약지점 점검을 위해 보내야하는 최소의 친구 수값 return
+
+//1.dist로 조합을 만든다
+//2. 만들어진 조합으로 시작부분을 다르게해서 파견 시작?
+
+bool ch_dist[8];
+bool ch_weak[200];	//true면 취약지점
+vector<int> v;		//dist 조합
+int dist_size = 0;
+int weak_size = 0;
+int N;
+int answer = 987654321;
+
+//시작점이 now
+void process(int now) {
+	int tmp = 0;
+	int index = now;
+	for (int i = 0; i < v.size(); i++) {
+
+		//now~now+v[i]까지 존재하는 취약지점을 방문처리
+		for (int j = 0; j <= v[i]; j++) {
+			//현위치가 취약지역이면 방문 처리
+			if (ch_weak[index]) {
+				tmp++;
+			}
+			//취약지역을 다 봤으면
+			if (tmp == weak_size) {
+				answer = min(answer, i + 1);
+				return;
+			}
+			//더 돌기위해 index update
+			index++;
+			index = index % N;
+		}
+		//한명더 파견보내야할경우
+		//다음시작위치 지정
+		index++;
+		while (1) {
+			index = index % N;
+			if (ch_weak[index]) break;
+			index++;
+		}
+
+	}
+}
+//조합만들기
+void make(vector<int> weak, vector<int> dist) {
+
+	//조합이 다만들어졌으면 시작지점을 다르게해서 보낸다
+	if (v.size() == dist_size) {
+		for (int i = 0; i < weak.size(); i++) {
+			process(weak[i]);
+		}
+	}
+
+	for (int i = 0; i < dist_size; i++) {
+		if (!ch_dist[i]) {
+			ch_dist[i] = true;
+			v.push_back(dist[i]);
+			make(weak, dist);
+			v.pop_back();
+			ch_dist[i] = false;
+		}
+	}
+}
+int solution(int n, vector<int> weak, vector<int> dist) {
+	dist_size = dist.size();
+	weak_size = weak.size();
+	N = n;
+
+	//초기화 
+	for (int i = 0; i < weak.size(); i++) {
+		ch_weak[weak[i]] = true;
+	}
+	make(weak, dist);
+
+	if (answer >= 987654321) answer = -1;
+	return answer;
+}
