@@ -1,0 +1,141 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+//직사각형이 될수있는경우는 총 5가지 블록 모양이다
+//탐색을 통해 5가지 경우에 들어가는지 본다
+//5가지경우에 들어가면 검은 블록을 떨어트릴수있는지 본다
+//못떨어트리면 무시
+//떨어트리기 가능이면 없애주고 처음부터 다시 탐색
+
+//10:10
+int arr[60][60] = { 0 };
+
+pair<int, int>p[5][4] = {
+	{{0,0},{1,0},{1,1},{1,2}},
+	{{0,0},{1,0},{2,0},{2,-1}},
+	{{0,0},{1,0},{2,0},{2,1}},
+	{{0,0},{0,1},{0,2},{-1,2}},
+	{{0,0},{0,1},{-1,1},{0,2}}
+};
+
+//해당 모양을 0으로
+void remove(int x, int y, int index) {
+	int i = index - 1;
+
+	for (int j = 0; j < 4; j++) {
+		int newx = x + p[i][j].first;
+		int newy = y + p[i][j].second;
+		arr[newx][newy] = 0;
+	}
+}
+//떨어트릴수있는지
+bool drop(int x, int y, int index) {
+	bool flag = true;
+	//1. (1,y+1) ~ (x,y+1) && (1,y+2) ~ (x,y+2)
+	if (index == 1) {
+		for (int i = 1; i <= x; i++) {
+			for (int j = y + 1; j <= y + 2; j++) {
+				if (arr[i][j] != 0) {
+					flag = false;
+					break;
+				}
+			}
+			if (!flag) break;
+		}
+	}
+	//2. (1,y-1) ~ (x + 1,y-1) 
+	if (index == 2) {
+		for (int i = 1; i < x + 2; i++) {
+			if (arr[i][y - 1] != 0) {
+				flag = false;
+				break;
+			}
+		}
+	}
+	//3. (1,y + 1) ~ (x + 1,y + 1) 
+	if (index == 3) {
+		for (int i = 1; i < x + 2; i++) {
+			if (arr[i][y + 1] != 0) {
+				flag = false;
+				break;
+			}
+		}
+	}
+	//4. (1,y) ~ (x - 1,y) && (1,y+1) ~ (x - 1,y+1)
+	if (index == 4) {
+		for (int i = 1; i < x; i++) {
+			for (int j = y; j <= y + 1; j++) {
+				if (arr[i][j] != 0) {
+					flag = false;
+					break;
+				}
+			}
+			if (!flag) break;
+		}
+	}
+	//5. (1,y) ~ (x - 1,y) && (1,y+2) ~ (x - 1,y+2)
+	if (index == 5) {
+		for (int i = 1; i < x; i++) {
+			if (arr[i][y] != 0 || arr[i][y + 2] != 0) {
+				flag = false;
+				break;
+			}
+		}
+	}
+	return flag;
+}
+int check(int x, int y) {
+
+	for (int i = 0; i < 5; i++) {
+
+		int result = i + 1;
+
+		for (int j = 0; j < 4; j++) {
+			int newx = x + p[i][j].first;
+			int newy = y + p[i][j].second;
+
+			if (arr[newx][newy] != arr[x][y]) {
+				result = 0;
+				break;
+			}
+		}
+
+		//result가 0이아니면 5가지중 하나
+		if (result != 0) return result;
+	}
+
+	return 0;
+}
+int solution(vector<vector<int>> board) {
+	int answer = 0;
+
+	//우선 복사
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[i].size(); j++) {
+			arr[i + 1][j + 1] = board[i][j];
+		}
+	}
+
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[i].size(); j++) {
+			if (arr[i + 1][j + 1] == 0) continue;
+
+			//5종류중 하나라면 검은블록을 떨궈서 부실수있는지 본다
+			int tmp = check(i + 1, j + 1);
+
+			if (tmp == 0) continue;
+			//부실수있다면
+			if (drop(i + 1, j + 1, tmp)) {
+				answer++;
+				remove(i + 1, j + 1, tmp);
+				i = 0; j = 0;
+			}
+
+
+		}
+	}
+	return answer;
+}
