@@ -1,0 +1,50 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <stack>
+	
+using namespace std;
+
+//n*n 공백 , #(벽)
+//지도 1 ,2중 어느하나라도 벽인면 벽
+//공백은 공백
+//or을 쓰면 될듯
+
+vector<int> v;
+
+string prcoess(int n , int N) {
+
+	stack<char> s;
+	while (N!=0) {
+		if (N % 2 == 1) s.push('#');
+		else s.push(' ');
+		N = N / 2;
+	}
+
+	while (s.size() < n)
+	{
+		s.push(' ');
+	}
+	string result = "";
+	while (!s.empty()) {
+		result += s.top();
+		s.pop();
+	}
+
+	return result;
+}
+vector<string> solution(int n, vector<int> arr1, vector<int> arr2) {
+
+	for (int i = 0; i < arr1.size(); i++) {
+		int tmp = arr1[i] | arr2[i];
+		v.push_back(tmp);
+	}
+
+	vector<string> answer;
+	for (int i = 0; i < v.size(); i++) {
+		int now = v[i];
+		string tmp  = prcoess(n, now);
+		answer.push_back(tmp);
+	}
+	return answer;
+}
