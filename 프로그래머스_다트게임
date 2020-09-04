@@ -1,0 +1,78 @@
+#include <string>
+#include <iostream>
+#include <stack>
+#include <algorithm>
+
+using namespace std;
+
+//다트를 세번 던져 점수의 합계로 대결
+//총 세번 ( 0 ~ 10 점)
+//점수와 함께 S D T가 존재 ( 1제곱 , 2제곱 , 3제곱)
+//옵션 * (해당 점수와 바로전 점수를 2배) , #(-해당점수)
+//*은 처음에도 나올수있다 그럼 처음꺼만 2배
+//*은 *과 중첩가능 그럼 4배 , #도 가능 -2배
+
+
+int solution(string dartResult) {
+
+	//숫자가 아니면 점수를 push
+	int score = 0;
+	int tmp1, tmp2;
+
+	stack<int> s;
+
+	for (int i = 0; i < dartResult.size(); i++) {
+		
+		if ('0' <= dartResult[i] && dartResult[i] <= '9') {
+			score *= 10;
+			score += dartResult[i] - '0';
+		}
+		//S , D , T 면
+		else if (dartResult[i] == 'S' || dartResult[i] == 'D' || dartResult[i] == 'T') {
+			if (dartResult[i] == 'D')  score = pow(score, 2);
+			if (dartResult[i] == 'T')  score = pow(score, 3);
+			s.push(score);
+			score = 0;
+		}
+		//2배로 변경
+		else if (dartResult[i] == '*') {
+			//하나만 변경
+			if (s.size() == 1) {
+				tmp1 = s.top();
+				tmp1 *= 2;
+				s.pop();
+				s.push(tmp1);
+			}
+			//둘다 변경 
+			else {
+				tmp1 = s.top();
+				tmp1 *= 2;
+				s.pop();
+				tmp2 = s.top();
+				tmp2 *= 2;
+				s.pop();
+				s.push(tmp2);
+				s.push(tmp1);
+			}
+		}
+		//음수로 변경
+		else if (dartResult[i] == '#') {
+			tmp1 = s.top();
+			tmp1 *= -1;
+			s.pop();
+			s.push(tmp1);
+		}
+	}
+	int answer = 0;
+	while (!s.empty()) {
+		cout << s.top() << " , ";
+		answer += s.top();
+		s.pop();
+	}
+	return answer;
+}
+
+int main() {
+	int N = 2;
+	cout << pow(2, 3);
+}
