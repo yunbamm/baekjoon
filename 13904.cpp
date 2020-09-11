@@ -6,8 +6,8 @@ using namespace std;
 
 int N, D, W;		//과제개수 ,마감일 , 점수
 
-int DP[1001][1001] = { 0 };
-int tmp[1001][1001] = { 0 };
+int DP[1001][1001] = { 0 };		//[day][일index]
+int tmp[1001][1001] = { 0 };		//
 vector<pair<int, int>> v;
 
 int main() {
